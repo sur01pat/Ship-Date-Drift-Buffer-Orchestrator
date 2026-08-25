@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ship-date-drift-adk"
+version = "1.0.0"
+description = "Inbound Ship-Date Drift & Inventory Buffer Orchestrator – ADK Layer"
+requires-python = ">=3.11"
+dependencies = [
+    "google-adk>=1.0.0",
+    "google-cloud-aiplatform[agent_engines,reasoningengine]>=1.60.0",
+    "cloudpickle>=3.0.0",
+    "google-auth>=2.29.0",
+    "requests>=2.32.0",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.7.0",
+]
+
+[tool.setuptools]
+# Include top-level .py modules (config, model_factory, agent, tool_server_client)
+py-modules = ["config", "model_factory", "tool_server_client", "agent"]
+
+[tool.setuptools.packages.find]
+# Discover all sub-packages (tools/, agents/, callbacks/)
+where = ["."]
+include = ["tools*", "agents*", "callbacks*"]
+exclude = ["tests*", ".venv*", ".venv311*"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

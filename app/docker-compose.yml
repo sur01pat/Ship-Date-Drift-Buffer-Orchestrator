@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # ── Node.js Backend (ERP/WMS/Freight tool server) ─────────────────────────
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - NODE_ENV=development
+      - JWT_SECRET=enterprise-orchestrator-secret-key-2024
+      - FRONTEND_URL=http://localhost:3000
+    volumes:
+      - orchestrator_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+    restart: unless-stopped
+
+  # ── ADK Python Agent Service ───────────────────────────────────────────────
+  # Runs `adk web` (the built-in ADK development UI) on port 8000.
+  # In production this is replaced by Vertex AI Agent Engine.
+  adk:
+    image: python:3.11-slim
+    working_dir: /app
+    command: >
+      sh -c "pip install -r requirements.txt --quiet &&
+             adk web --host 0.0.0.0 --port 8000"
+    volumes:
+      - ./adk:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - TOOL_SERVER_URL=http://backend:4000
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-your-gcp-project-id}
+      - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-us-central1}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-pro}
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── React Dashboard ────────────────────────────────────────────────────────
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  orchestrator_data:

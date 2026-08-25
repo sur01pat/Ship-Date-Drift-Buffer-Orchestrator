@@ -1,0 +1,193 @@
+
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Orchestrator Build Summary</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#f7f8fa;color:#1f2328}
+  .page{max-width:760px;margin:0 auto;padding:32px 24px}
+  h1{font-size:20px;font-weight:700;margin-bottom:4px}
+  .subtitle{font-size:12px;color:#57606a;margin-bottom:28px}
+  h2{font-size:14px;font-weight:700;margin:0 0 12px;color:#1f2328}
+  .badge{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600}
+  .badge-green{background:#d1fae5;color:#065f46}
+  .badge-blue{background:#dbeafe;color:#1e40af}
+  .badge-purple{background:#ede9fe;color:#5b21b6}
+  .badge-gray{background:#f3f4f6;color:#374151}
+  .card{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:16px 20px;margin-bottom:16px}
+  .card-left{border-left:4px solid #3b82d4}
+  .card-left-green{border-left:4px solid #10b981}
+  .card-left-purple{border-left:4px solid #7c5cd8}
+  .card-left-orange{border-left:4px solid #f97316}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#f7f8fa;padding:8px 12px;text-align:left;border-bottom:1px solid #e5e7eb;font-weight:600;font-size:12px;color:#57606a}
+  td{padding:7px 12px;border-bottom:1px solid #f3f4f6;vertical-align:top}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .metric{background:#fff;border:1px solid #e5e7eb;border-radius:8px;padding:14px 16px;text-align:center}
+  .metric-val{font-size:26px;font-weight:700;color:#1f2328}
+  .metric-lbl{font-size:12px;color:#57606a;margin-top:2px}
+  .step{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid #f3f4f6;align-items:flex-start}
+  .step-num{width:22px;height:22px;border-radius:50%;background:#3b82d4;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+  .step-body strong{font-size:13px}
+  .step-body p{font-size:12px;color:#57606a;margin-top:1px}
+  code{background:#f3f4f6;padding:1px 5px;border-radius:3px;font-size:11px;font-family:ui-monospace,monospace}
+  .arch{background:#1f2328;color:#9ca3af;border-radius:8px;padding:16px 20px;font-family:ui-monospace,monospace;font-size:11px;line-height:1.8;margin-bottom:16px}
+  .arch span{color:#93c5fd}
+  .arch em{color:#86efac;font-style:normal}
+  .footer{text-align:center;font-size:12px;color:#9ca3af;padding-top:24px;margin-top:32px;border-top:1px solid #e5e7eb}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>🚢 Ship-Date Drift &amp; Inventory Buffer Orchestrator</h1>
+  <p class="subtitle">Enterprise Agent Platform · v1.0.0-FINAL · <span class="badge badge-green">Build Successful</span>  <span class="badge badge-blue">43 Tests Passed</span></p>
+
+  
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:24px">
+    <div class="metric"><div class="metric-val">8</div><div class="metric-lbl">Subsystems Built</div></div>
+    <div class="metric"><div class="metric-val">43</div><div class="metric-lbl">Tests Passing</div></div>
+    <div class="metric"><div class="metric-val">4</div><div class="metric-lbl">Test Suites</div></div>
+    <div class="metric"><div class="metric-val">7</div><div class="metric-lbl">Dashboard Pages</div></div>
+  </div>
+
+  
+  <div class="card card-left">
+    <h2>System Architecture</h2>
+    <div class="arch">
+<span>[ Supplier Email / Carrier Webhook ]</span>
+         │
+         ▼
+<em>[ Model Armor Firewall ]</em>        ← Prompt injection, PII masking, tool-poisoning
+         │
+         ▼
+<em>[ Orchestrator Core ]</em>           ← 4-step async event-driven workflow
+   │      │      │
+   │      │      └──────────────► <span>[ Memory Bank ]</span>       — Vendor SLA, history
+   │      └────────────────────► <span>[ ERP/SAP Simulator ]</span> — BOM, PO, SO, Inventory
+   │
+   ├──── A2A Gateway ──────────► <span>[ Warehouse Sub-Agent ]</span> — Transfer Orders
+   └──── A2A Gateway ──────────► <span>[ Freight Sub-Agent ]</span>   — Air/Ocean/Ground
+         │
+         ▼
+<em>[ Agent Observability ]</em>         ← Reasoning chains, audit ledger
+         │
+         ▼
+<em>[ Human Sign-Off ]</em>             ← 1-click approval via React dashboard + WebSocket
+    </div>
+  </div>
+
+  
+  <div class="card">
+    <h2>Subsystem Registry</h2>
+    <table>
+      <thead><tr>
+        <th>Layer</th><th>Module</th><th>File</th><th>Status</th>
+      </tr></thead>
+      <tbody>
+        <tr><td>Security</td><td><strong>Model Armor</strong></td><td><code>src/armor/modelArmor.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Discovery</td><td><strong>Agent Registry</strong></td><td><code>src/registry/agentRegistry.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>State</td><td><strong>Memory Bank</strong></td><td><code>src/memory/memoryBank.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>ERP</td><td><strong>SAP Simulator</strong></td><td><code>src/erp/erpSimulator.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Access</td><td><strong>Agent Identity (OIDC)</strong></td><td><code>src/identity/agentIdentity.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Routing</td><td><strong>Agent Gateway (A2A)</strong></td><td><code>src/gateway/agentGateway.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Sub-agent</td><td><strong>Warehouse Agent</strong></td><td><code>src/warehouse/warehouseAgent.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Sub-agent</td><td><strong>Freight Agent</strong></td><td><code>src/freight/freightAgent.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Observability</td><td><strong>Audit Ledger</strong></td><td><code>src/observability/auditLog.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+        <tr><td>Orchestrator</td><td><strong>Workflow Engine</strong></td><td><code>src/orchestrator/orchestrator.js</code></td><td><span class="badge badge-green">✓ Live</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="card card-left-purple">
+    <h2>4-Step Orchestration Workflow</h2>
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-body"><strong>Inbound Event Ingestion &amp; Model Armor Screening</strong><p>Supplier email / carrier webhook received → Model Armor scans for prompt injection, PII, tool poisoning → sanitized payload passed to runtime.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-body"><strong>Context Retrieval &amp; ERP Impact Analysis</strong><p>Memory Bank retrieves vendor SLA (Clause 14B), reliability score, and delivery history. ERP/SAP queried via OIDC token → BOM reverse-lookup → impacted Sales Orders identified → revenue at risk calculated.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-body"><strong>Sub-Agent Coordination via A2A Gateway</strong><p>Gateway enforces policy (max auto-freight $50k, max delay 10 days). Warehouse Sub-Agent creates WTO if buffer below reorder point. Freight Sub-Agent recommends air/ocean/ground and creates request.</p></div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-body"><strong>Remediation Staging &amp; Human Sign-Off</strong><p>ERP PO updated, Sales Orders revised, draft vendor credit claim generated. Full reasoning chain written to Audit Ledger. 1-click Approve / Reject card pushed to dashboard via WebSocket.</p></div>
+    </div>
+  </div>
+
+  
+  <div class="card card-left-orange">
+    <h2>Seed Data (Simulated Enterprise Systems)</h2>
+    <div class="grid2">
+      <div>
+        <strong style="font-size:12px;color:#57606a">VENDORS (Memory Bank)</strong>
+        <table style="margin-top:6px">
+          <tr><td>Apex Components Ltd.</td><td><span class="badge badge-gray">APAC</span></td></tr>
+          <tr><td>NovaTech Supplies</td><td><span class="badge badge-gray">EMEA</span></td></tr>
+          <tr><td>Pacific Rim Fabricators</td><td><span class="badge badge-gray">APAC</span></td></tr>
+          <tr><td>Sterling Industrial</td><td><span class="badge badge-gray">NA</span></td></tr>
+        </table>
+      </div>
+      <div>
+        <strong style="font-size:12px;color:#57606a">PURCHASE ORDERS (ERP)</strong>
+        <table style="margin-top:6px">
+          <tr><td>PO-2025-001</td><td>MCU-100 · 5,000 units</td></tr>
+          <tr><td>PO-2025-002</td><td>PCB-200 · 2,000 units <span class="badge" style="background:#fee2e2;color:#991b1b;font-size:10px">+7d</span></td></tr>
+          <tr><td>PO-2025-004</td><td>PWR-300 · 1,000 units <span class="badge" style="background:#fee2e2;color:#991b1b;font-size:10px">+5d</span></td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="card card-left-green">
+    <h2>Test Results — 43 / 43 Passed</h2>
+    <table>
+      <thead><tr><th>Suite</th><th>Tests</th><th>Covers</th></tr></thead>
+      <tbody>
+        <tr><td><code>armor.test.js</code></td><td>12 ✓</td><td>Prompt injection, PII masking, scan API</td></tr>
+        <tr><td><code>gateway.test.js</code></td><td>10 ✓</td><td>Task validation, policy enforcement, cost/delay limits</td></tr>
+        <tr><td><code>erp.test.js</code></td><td>7 ✓</td><td>PO/SO queries, BOM impact analysis, inventory buffers</td></tr>
+        <tr><td><code>api.test.js</code></td><td>14 ✓</td><td>Full REST integration: health, auth, registry, ERP, orchestrator, audit</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+  <div class="card">
+    <h2>How to Run</h2>
+    <table>
+      <tr><td style="width:160px"><strong>Development</strong></td><td><code>./start-dev.sh</code> — installs deps, runs tests, starts both servers</td></tr>
+      <tr><td><strong>Docker</strong></td><td><code>cd app &amp;&amp; docker compose up --build</code></td></tr>
+      <tr><td><strong>Frontend</strong></td><td><a href="http://localhost:3000">http://localhost:3000</a></td></tr>
+      <tr><td><strong>Backend API</strong></td><td><a href="http://localhost:4000/api">http://localhost:4000/api</a></td></tr>
+      <tr><td><strong>WebSocket</strong></td><td><code>ws://localhost:4000/ws</code></td></tr>
+      <tr><td><strong>Health</strong></td><td><a href="http://localhost:4000/health">http://localhost:4000/health</a></td></tr>
+    </table>
+  </div>
+
+  
+  <div class="card">
+    <h2>Dashboard Pages</h2>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px">
+      <span class="badge badge-blue">🏠 Dashboard</span>
+      <span class="badge badge-blue">⚡ Orchestration Events</span>
+      <span class="badge badge-blue">🏭 ERP/SAP Simulator</span>
+      <span class="badge badge-blue">🏢 Vendor Profiles</span>
+      <span class="badge badge-blue">📦 Warehouse &amp; Freight</span>
+      <span class="badge badge-blue">📋 Audit Ledger</span>
+      <span class="badge badge-blue">🗂️ Agent Registry</span>
+    </div>
+  </div>
+
+  <div class="footer">Made with IBM Bob</div>
+</div>
+</body>
+</html>

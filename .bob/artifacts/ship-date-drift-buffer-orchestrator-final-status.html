@@ -1,0 +1,226 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ship-Date Drift &amp; Buffer Orchestrator — Final Status</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, "Segoe UI", system-ui, sans-serif; font-size: 14px; line-height: 1.6; background: #ffffff; color: #1f2328; }
+  .page { max-width: 760px; margin: 0 auto; padding: 40px 24px 60px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: #57606a; margin-bottom: 32px; font-size: 13px; }
+  h2 { font-size: 15px; font-weight: 600; margin: 32px 0 12px; color: #1f2328; border-bottom: 1px solid #e5e7eb; padding-bottom: 6px; }
+  h3 { font-size: 13px; font-weight: 600; margin: 16px 0 8px; color: #57606a; text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Score banner */
+  .score-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 8px; }
+  .score-card { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 6px; padding: 14px 16px; text-align: center; }
+  .score-card .num { font-size: 28px; font-weight: 700; color: #22863a; }
+  .score-card .lbl { font-size: 12px; color: #57606a; margin-top: 2px; }
+
+  /* Status pills */
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; font-weight: 600; }
+  .pill-green  { background: #dafbe1; color: #1a7f37; }
+  .pill-blue   { background: #ddf4ff; color: #0969da; }
+  .pill-orange { background: #fff8c5; color: #9a6700; }
+
+  /* Test results table */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { text-align: left; padding: 6px 10px; background: #f7f8fa; border: 1px solid #e5e7eb; font-weight: 600; color: #57606a; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
+  td { padding: 7px 10px; border: 1px solid #e5e7eb; vertical-align: top; }
+  tr:nth-child(even) td { background: #fafafa; }
+  .pass { color: #22863a; font-weight: 600; }
+  .mono { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; }
+
+  /* Stack table */
+  .stack-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .stack-item { background: #f7f8fa; border: 1px solid #e5e7eb; border-radius: 5px; padding: 10px 12px; }
+  .stack-item .name { font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .stack-item .desc { font-size: 12px; color: #57606a; }
+
+  /* Commands */
+  .cmd-block { background: #f6f8fa; border: 1px solid #e5e7eb; border-radius: 5px; padding: 12px 14px; margin: 6px 0; }
+  .cmd-block code { font-family: "SFMono-Regular", Consolas, monospace; font-size: 12px; color: #1f2328; white-space: pre-wrap; }
+
+  /* Warning note */
+  .note { background: #fff8c5; border: 1px solid #e5e7eb; border-radius: 5px; padding: 10px 14px; font-size: 13px; color: #9a6700; margin-top: 8px; }
+
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid #e5e7eb; text-align: center; font-size: 12px; color: #57606a; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>Ship-Date Drift &amp; Inventory Buffer Orchestrator</h1>
+  <div class="subtitle">v1.0.0-FINAL  ·  Google ADK 2.6.3  ·  Vertex AI (gemini-2.5-pro)  ·  GCP gen-lang-client-0692958287</div>
+
+  
+  <div class="score-row">
+    <div class="score-card"><div class="num">106</div><div class="lbl">Tests Passing</div></div>
+    <div class="score-card"><div class="num">0</div><div class="lbl" style="color:#cb2431">Failures</div></div>
+    <div class="score-card"><div class="num">15</div><div class="lbl">ADK FunctionTools</div></div>
+    <div class="score-card"><div class="num">4</div><div class="lbl">ADK Agents</div></div>
+  </div>
+
+  
+  <h2>Test Results</h2>
+  <table>
+    <thead>
+      <tr><th>Suite</th><th>File</th><th>Tests</th><th>Status</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>Agent wiring &amp; structure</td>
+        <td class="mono">test_agents.py</td>
+        <td class="pass">8 / 8</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>Model Armor callbacks</td>
+        <td class="mono">test_callbacks.py</td>
+        <td class="pass">8 / 8</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>Backend detection &amp; client routing</td>
+        <td class="mono">test_model_factory.py</td>
+        <td class="pass">16 / 16</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>HTTP tool-server client</td>
+        <td class="mono">test_tool_server_client.py</td>
+        <td class="pass">12 / 12</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>FunctionTool unit tests (all 15 tools)</td>
+        <td class="mono">test_tools.py</td>
+        <td class="pass">19 / 19</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>Model Armor (Node.js)</td>
+        <td class="mono">armor.test.js</td>
+        <td class="pass">12 / 12</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>Agent Gateway &amp; A2A routing</td>
+        <td class="mono">gateway.test.js</td>
+        <td class="pass">10 / 10</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>ERP / SAP simulator</td>
+        <td class="mono">erp.test.js</td>
+        <td class="pass">7 / 7</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+      <tr>
+        <td>Full REST API + Orchestrator workflow</td>
+        <td class="mono">api.test.js</td>
+        <td class="pass">14 / 14</td>
+        <td><span class="pill pill-green">PASS</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>Architecture Layers</h2>
+  <div class="stack-grid">
+    <div class="stack-item">
+      <div class="name"><span class="pill pill-blue">ADK</span>  Python Agent Layer</div>
+      <div class="desc">SequentialAgent root → LlmAgent × 3 + ParallelAgent sub-coordinator. 15 FunctionTools. 2 ADK callbacks (Model Armor). Vertex AI / gemini-2.5-pro backend.</div>
+    </div>
+    <div class="stack-item">
+      <div class="name"><span class="pill pill-blue">Node.js</span>  Tool Server</div>
+      <div class="desc">Express REST + WebSocket. ERP/SAP simulator, Memory Bank, Warehouse Agent, Freight Agent, Agent Gateway (A2A), Model Armor, OIDC JWT identity, audit ledger.</div>
+    </div>
+    <div class="stack-item">
+      <div class="name"><span class="pill pill-blue">React</span>  Dashboard</div>
+      <div class="desc">7-page SPA: Events (approve/reject), ERP/SAP, Vendors, Warehouse &amp; Freight, Audit Ledger, Agent Registry, live WebSocket feed.</div>
+    </div>
+    <div class="stack-item">
+      <div class="name"><span class="pill pill-blue">Deployment</span>  Vertex AI</div>
+      <div class="desc">deploy_agent_engine.py wraps root_agent in AdkApp → ReasoningEngine.create(). Cloud Build CI/CD pipeline. Cloud Run for backend + frontend. ADC auth.</div>
+    </div>
+  </div>
+
+  
+  <h2>ADK Agent Hierarchy</h2>
+  <table>
+    <thead>
+      <tr><th>Agent</th><th>Type</th><th>Tools</th><th>Role</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="mono">orchestrator_agent</td>
+        <td>SequentialAgent (root)</td>
+        <td>—</td>
+        <td>4-step pipeline: ingest → ERP → coordinate → remediate</td>
+      </tr>
+      <tr>
+        <td class="mono">erp_analysis_agent</td>
+        <td>LlmAgent</td>
+        <td>5 ERP tools</td>
+        <td>POs, BOM impact, SOs, inventory buffers</td>
+      </tr>
+      <tr>
+        <td class="mono">sub_agent_coordinator</td>
+        <td>ParallelAgent</td>
+        <td>—</td>
+        <td>Runs warehouse + freight + memory agents in parallel</td>
+      </tr>
+      <tr>
+        <td class="mono">warehouse_agent</td>
+        <td>LlmAgent</td>
+        <td>2 WTO tools</td>
+        <td>Create &amp; list Warehouse Transfer Orders</td>
+      </tr>
+      <tr>
+        <td class="mono">freight_agent</td>
+        <td>LlmAgent</td>
+        <td>2 freight tools</td>
+        <td>Mode selection, cost estimation, freight requests</td>
+      </tr>
+      <tr>
+        <td class="mono">memory_agent</td>
+        <td>LlmAgent</td>
+        <td>4 memory tools</td>
+        <td>Vendor SLA history, buffer rules, delivery patterns</td>
+      </tr>
+    </tbody>
+  </table>
+
+  
+  <h2>Run Commands</h2>
+  <h3>Run All Tests</h3>
+  <div class="cmd-block"><code>cd app/adk  &amp;&amp; .venv/bin/pytest tests/ -v   # 63 ADK Python tests
+cd app/backend &amp;&amp; npm test --forceExit      # 43 Node.js tests</code></div>
+
+  <h3>Start Dev Stack</h3>
+  <div class="cmd-block"><code>./start-dev.sh                          # tests + backend :4000 + frontend :3000
+# OR individually:
+cd app/backend  &amp;&amp; npm start              # :4000  (REST + WebSocket)
+cd app/adk      &amp;&amp; adk web                 # :8000  (ADK dev UI)
+cd app/frontend &amp;&amp; npm start              # :3000  (React dashboard)
+# OR via Docker Compose:
+cd app &amp;&amp; docker compose up --build</code></div>
+
+  <h3>Deploy to Vertex AI Agent Engine</h3>
+  <div class="cmd-block"><code>cd app/adk
+python deployment/deploy_agent_engine.py \
+  --project gen-lang-client-0692958287 \
+  --location us-central1</code></div>
+
+  
+  <div class="note">
+    ⚠️ <strong>ADK deprecation warnings (not failures):</strong> <code>SequentialAgent</code> and <code>ParallelAgent</code> are deprecated in ADK 2.6.3 in favour of <code>Workflow</code>, but <code>Workflow</code> cannot yet be used as an <code>LlmAgent</code> sub-agent. Migration will be possible in a future ADK release.
+  </div>
+
+</div>
+<footer>Made with IBM Bob</footer>
+</body>
+</html>

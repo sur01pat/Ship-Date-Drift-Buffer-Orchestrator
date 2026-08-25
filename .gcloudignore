@@ -1,0 +1,15 @@
+.git
+app/adk/.venv
+app/adk/.venv311
+app/adk/__pycache__
+app/adk/agents/__pycache__
+app/adk/tools/__pycache__
+app/adk/callbacks/__pycache__
+app/adk/.pytest_cache
+app/adk/.adk
+app/backend/node_modules
+app/frontend/node_modules
+app/frontend/build
+**/__pycache__
+**/.pytest_cache
+*.pyc

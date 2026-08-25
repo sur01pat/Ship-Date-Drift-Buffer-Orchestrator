@@ -1,0 +1,17 @@
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--build-arg'
+      - 'REACT_APP_API_URL=https://orchestrator-backend-628095447119.us-central1.run.app/api'
+      - '--build-arg'
+      - 'REACT_APP_WS_URL=wss://orchestrator-backend-628095447119.us-central1.run.app/ws'
+      - '-t'
+      - 'gcr.io/ship-date-drift/orchestrator-frontend:v1'
+      - '.'
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/ship-date-drift/orchestrator-frontend:v1'
+images:
+  - 'gcr.io/ship-date-drift/orchestrator-frontend:v1'

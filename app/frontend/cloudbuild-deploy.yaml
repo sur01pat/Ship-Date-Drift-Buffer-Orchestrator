@@ -1,0 +1,15 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - gcr.io/ship-date-drift/orchestrator-frontend:memories
+      - --build-arg
+      - REACT_APP_API_URL=https://orchestrator-backend-628095447119.us-central1.run.app/api
+      - --build-arg
+      - REACT_APP_WS_URL=wss://orchestrator-backend-628095447119.us-central1.run.app/ws
+      - .
+images:
+  - gcr.io/ship-date-drift/orchestrator-frontend:memories
+options:
+  logging: CLOUD_LOGGING_ONLY

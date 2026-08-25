@@ -1,0 +1,150 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Cloud Build Pipeline – CI/CD for Gemini Enterprise Agent Platform
+# Project: ship-date-drift (628095447119)
+# ─────────────────────────────────────────────────────────────────────────────
+# Triggered manually or on push to main. Runs:
+#   1. Node.js backend tests
+#   2. ADK Python tests              (parallel with step 1)
+#   3. Build Docker images           (backend + frontend)
+#   4. Push Docker images
+#   5. Deploy backend to Cloud Run   (with all GCP service env vars)
+#   6. Deploy frontend to Cloud Run  (with baked-in Cloud Run API URL)
+# ─────────────────────────────────────────────────────────────────────────────
+
+steps:
+  # ── Step 1: Node.js Backend Tests ─────────────────────────────────────────
+  - name: node:20-alpine
+    id: backend-test
+    dir: app/backend
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        npm ci
+        NODE_ENV=test \
+        GCP_IDENTITY_ENABLED=false \
+        GCP_REGISTRY_ENABLED=false \
+        FIRESTORE_REGISTRY_ENABLED=false \
+        FIRESTORE_MEMORY_ENABLED=false \
+        FIRESTORE_SESSIONS_ENABLED=false \
+        PUBSUB_EVENTS_ENABLED=false \
+        CLOUD_TASKS_ENABLED=false \
+        RUNTIME_TASKS_ENABLED=false \
+        DLP_ENABLED=false \
+        OTEL_ENABLED=false \
+        npm test
+
+  # ── Step 2: ADK Python Tests ──────────────────────────────────────────────
+  - name: python:3.11-slim
+    id: adk-test
+    dir: app/adk
+    entrypoint: sh
+    args:
+      - -c
+      - |
+        pip install -r requirements.txt --quiet
+        pytest tests/ -v --tb=short
+    waitFor: ["-"]   # run in parallel with backend-test
+
+  # ── Step 3a: Build Backend Docker Image ───────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: build-backend
+    args:
+      - build
+      - -t
+      - gcr.io/$PROJECT_ID/orchestrator-backend:$COMMIT_SHA
+      - -t
+      - gcr.io/$PROJECT_ID/orchestrator-backend:latest
+      - app/backend
+    waitFor: [backend-test]
+
+  # ── Step 3b: Build Frontend Docker Image ──────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: build-frontend
+    args:
+      - build
+      - -t
+      - gcr.io/$PROJECT_ID/orchestrator-frontend:$COMMIT_SHA
+      - -t
+      - gcr.io/$PROJECT_ID/orchestrator-frontend:latest
+      - --build-arg
+      - REACT_APP_API_URL=https://orchestrator-backend-628095447119.us-central1.run.app/api
+      - --build-arg
+      - REACT_APP_WS_URL=wss://orchestrator-backend-628095447119.us-central1.run.app/ws
+      - app/frontend
+    waitFor: [backend-test]
+
+  # ── Step 4a: Push Backend Image ───────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-backend
+    args: [push, gcr.io/$PROJECT_ID/orchestrator-backend:$COMMIT_SHA]
+    waitFor: [build-backend]
+
+  # ── Step 4b: Push Backend 'latest' tag ────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-backend-latest
+    args: [push, gcr.io/$PROJECT_ID/orchestrator-backend:latest]
+    waitFor: [build-backend]
+
+  # ── Step 4c: Push Frontend Image ──────────────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-frontend
+    args: [push, gcr.io/$PROJECT_ID/orchestrator-frontend:$COMMIT_SHA]
+    waitFor: [build-frontend]
+
+  # ── Step 4d: Push Frontend 'latest' tag ───────────────────────────────────
+  - name: gcr.io/cloud-builders/docker
+    id: push-frontend-latest
+    args: [push, gcr.io/$PROJECT_ID/orchestrator-frontend:latest]
+    waitFor: [build-frontend]
+
+  # ── Step 5: Deploy Backend to Cloud Run ───────────────────────────────────
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-backend
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - orchestrator-backend
+      - --image=gcr.io/$PROJECT_ID/orchestrator-backend:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --service-account=orchestrator-agent@$PROJECT_ID.iam.gserviceaccount.com
+      - --set-secrets=JWT_SECRET=orchestrator-jwt-secret:latest
+      - --memory=512Mi
+      - --cpu=1
+      - --min-instances=1
+      - --max-instances=10
+      - --execution-environment=gen2
+      - --set-env-vars
+      - NODE_ENV=production,LOG_LEVEL=info,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1,OTEL_ENABLED=true,GCP_IDENTITY_ENABLED=true,SECRET_MANAGER_JWT_ENABLED=true,SECRET_MANAGER_SLA_ENABLED=true,GCP_REGISTRY_ENABLED=true,FIRESTORE_REGISTRY_ENABLED=true,FIRESTORE_MEMORY_ENABLED=true,FIRESTORE_SESSIONS_ENABLED=true,PUBSUB_EVENTS_ENABLED=true,PUBSUB_TOPIC_ID=orchestrator-events,CLOUD_TASKS_ENABLED=true,CLOUD_TASKS_QUEUE=orchestrator-approval-reminders,RUNTIME_TASKS_ENABLED=true,LONG_RUNNING_QUEUE=orchestrator-long-running,DLP_ENABLED=false,MODEL_ARMOR_ENABLED=true,MODEL_ARMOR_TEMPLATE_ID=orchestrator-armor-v1,FRONTEND_URL=https://orchestrator-frontend-628095447119.us-central1.run.app
+    waitFor: [push-backend]
+
+  # ── Step 6: Deploy Frontend to Cloud Run ──────────────────────────────────
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    id: deploy-frontend
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - orchestrator-frontend
+      - --image=gcr.io/$PROJECT_ID/orchestrator-frontend:$COMMIT_SHA
+      - --region=us-central1
+      - --platform=managed
+      - --allow-unauthenticated
+      - --memory=256Mi
+      - --cpu=1
+      - --min-instances=0
+      - --max-instances=5
+    waitFor: [push-frontend]
+
+images:
+  - gcr.io/$PROJECT_ID/orchestrator-backend:$COMMIT_SHA
+  - gcr.io/$PROJECT_ID/orchestrator-frontend:$COMMIT_SHA
+
+options:
+  logging: CLOUD_LOGGING_ONLY
+  machineType: E2_HIGHCPU_8
+
+timeout: 1800s

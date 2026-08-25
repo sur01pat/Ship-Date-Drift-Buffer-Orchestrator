@@ -1,0 +1,149 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Gemini Enterprise Agent Platform – Agent Engine Manifest
+# ─────────────────────────────────────────────────────────────────────────────
+# This YAML describes the full Agent Engine deployment configuration.
+# Referenced by deploy_agent_engine.py and the Cloud Build pipeline.
+#
+# Spec alignment:
+#   §2.A – Agent Registry (Discovery & Versioning)
+#   §2.B – Agent Runtime & Memory Bank
+#   §2.C – Agent Identity (Zero-Trust)
+#   §2.D – Agent Gateway (A2A Routing)
+#   §2.E – Model Armor (Security)
+#   §2.F – Agent Observability
+# ─────────────────────────────────────────────────────────────────────────────
+
+apiVersion: gemini.enterprise/v1
+kind: AgentEngine
+metadata:
+  name: ship-date-drift-orchestrator
+  displayName: "Inbound Ship-Date Drift & Inventory Buffer Orchestrator"
+  version: "1.0.0-FINAL"
+  labels:
+    team: supply-chain
+    domain: procurement
+    criticality: high
+
+spec:
+  # ── Runtime ────────────────────────────────────────────────────────────────
+  runtime:
+    platform: vertexai-agent-engine           # Gemini Enterprise Agent Platform
+    region: us-central1
+    project: "${GOOGLE_CLOUD_PROJECT}"
+    stagingBucket: "${VERTEX_STAGING_BUCKET}"
+    tracingEnabled: true                       # §2.F – OpenTelemetry tracing
+
+  # ── Agent Identity (Zero-Trust OIDC) ──────────────────────────────────────
+  identity:
+    type: workloadIdentity                     # §2.C – Cryptographic identity
+    serviceAccount: "orchestrator-agent@${GOOGLE_CLOUD_PROJECT}.iam.gserviceaccount.com"
+    tokenLifetimeSeconds: 3600
+    scopes:
+      - "https://www.googleapis.com/auth/cloud-platform"
+      - "https://www.googleapis.com/auth/bigquery.readonly"
+
+  # ── Root Agent ─────────────────────────────────────────────────────────────
+  agent:
+    entrypoint: "agent:root_agent"             # ADK root_agent export
+    model: gemini-2.5-pro
+    adkVersion: ">=2.0.0"
+
+    # ── Agent Registry (§2.A) ────────────────────────────────────────────────
+    registry:
+      id: agent-orchestrator-v1
+      capabilities:
+        - event_ingestion
+        - erp_query
+        - bom_analysis
+        - sub_agent_delegation
+        - human_approval
+        - credit_claim_generation
+      inputSchema:
+        type: object
+        required: [source, vendor_id, po_number, reported_delay_days]
+        properties:
+          source:               { type: string, enum: [supplier_email, carrier_webhook] }
+          vendor_id:            { type: string }
+          po_number:            { type: string }
+          reported_delay_days:  { type: integer, minimum: 0 }
+          notes:                { type: string }
+      outputSchema:
+        type: object
+        properties:
+          session_id:       { type: string }
+          remediation_plan: { type: object }
+          status:           { type: string }
+
+    # ── Sub-Agents (A2A via Agent Gateway §2.D) ──────────────────────────────
+    subAgents:
+      - id: agent-warehouse-v1
+        name: WarehouseSubAgent
+        entrypoint: "agents.warehouse_agent:warehouse_agent"
+        capabilities: [wto_create, wto_update, inventory_query]
+        dispatchMode: parallel
+
+      - id: agent-freight-v1
+        name: FreightSubAgent
+        entrypoint: "agents.freight_agent:freight_agent"
+        capabilities: [freight_quote, freight_book, mode_recommendation]
+        dispatchMode: parallel
+
+      - id: agent-memory-v1
+        name: MemoryBankAgent
+        entrypoint: "agents.memory_agent:memory_bank_agent"
+        capabilities: [vendor_profile_read, delivery_history_query, buffer_rule_query]
+        dispatchMode: sequential
+
+    # ── Model Armor (§2.E) ───────────────────────────────────────────────────
+    safetyCallbacks:
+      beforeModel: "callbacks.model_armor_callbacks:model_armor_before_model_callback"
+      afterModel:  "callbacks.model_armor_callbacks:model_armor_after_model_callback"
+    safetyPolicy:
+      blockingThreatTypes: [PROMPT_INJECTION, JAILBREAK_ATTEMPT]
+      dlpOnOutput: true
+      piiMaskingEnabled: true
+
+  # ── Tool Server (Node.js backend) ─────────────────────────────────────────
+  toolServer:
+    url: "${TOOL_SERVER_URL}"
+    authType: bearerToken
+    tokenEnvVar: TOOL_SERVER_TOKEN
+    healthEndpoint: /health
+    timeoutSeconds: 15
+
+  # ── Memory Bank Persistence (§2.B) ─────────────────────────────────────────
+  memoryBank:
+    type: cloudSql                             # Production: Cloud SQL (Postgres)
+    connectionString: "${MEMORY_BANK_DB_URL}"
+    hibernationEnabled: true                   # Sleep during multi-week lead times
+    checkpointIntervalMinutes: 5
+
+  # ── Policy Engine (§2.D – Deterministic guardrails) ───────────────────────
+  policyEngine:
+    maxAutoFreightCostUSD: 50000
+    maxAutoApproveDelayDays: 10
+    maxAutoWtoQuantity: 10000
+    humanApprovalChannels:
+      - type: slack
+        webhookEnvVar: SLACK_APPROVAL_WEBHOOK
+      - type: teams
+        webhookEnvVar: TEAMS_APPROVAL_WEBHOOK
+
+  # ── Observability (§2.F) ──────────────────────────────────────────────────
+  observability:
+    auditLog:
+      backend: cloudLogging
+      logName: "projects/${GOOGLE_CLOUD_PROJECT}/logs/orchestrator-audit"
+      immutable: true                          # Append-only via log sinks
+    tracing:
+      backend: cloudTrace
+      samplingRate: 1.0                        # 100% sampling for compliance
+    metrics:
+      backend: cloudMonitoring
+      dashboardId: orchestrator-ops-dashboard
+
+  # ── Scaling ────────────────────────────────────────────────────────────────
+  scaling:
+    minInstances: 1
+    maxInstances: 10
+    targetConcurrentSessions: 50

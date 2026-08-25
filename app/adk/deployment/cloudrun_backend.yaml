@@ -1,0 +1,96 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Cloud Run Service Manifest – Backend Tool Server
+# Project: ship-date-drift (628095447119)
+# ─────────────────────────────────────────────────────────────────────────────
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: orchestrator-backend
+  labels:
+    app: orchestrator
+    component: backend
+    managed-by: cloud-build
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "1"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: orchestrator-agent@ship-date-drift.iam.gserviceaccount.com
+      containers:
+        - image: gcr.io/ship-date-drift/orchestrator-backend:latest
+          ports:
+            - containerPort: 4000
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+          env:
+            - name: PORT
+              value: "4000"
+            - name: NODE_ENV
+              value: production
+            - name: LOG_LEVEL
+              value: info
+            - name: GOOGLE_CLOUD_PROJECT
+              value: ship-date-drift
+            - name: GOOGLE_CLOUD_LOCATION
+              value: us-central1
+            - name: OTEL_ENABLED
+              value: "true"
+            - name: GCP_IDENTITY_ENABLED
+              value: "true"
+            - name: GCP_REGISTRY_ENABLED
+              value: "true"
+            - name: FIRESTORE_REGISTRY_ENABLED
+              value: "true"
+            - name: FIRESTORE_MEMORY_ENABLED
+              value: "true"
+            - name: FIRESTORE_SESSIONS_ENABLED
+              value: "true"
+            - name: SECRET_MANAGER_JWT_ENABLED
+              value: "true"
+            - name: SECRET_MANAGER_SLA_ENABLED
+              value: "true"
+            - name: PUBSUB_EVENTS_ENABLED
+              value: "true"
+            - name: PUBSUB_TOPIC_ID
+              value: orchestrator-events
+            - name: CLOUD_TASKS_ENABLED
+              value: "true"
+            - name: CLOUD_TASKS_QUEUE
+              value: orchestrator-approval-reminders
+            - name: RUNTIME_TASKS_ENABLED
+              value: "true"
+            - name: LONG_RUNNING_QUEUE
+              value: orchestrator-long-running
+            - name: DLP_ENABLED
+              value: "true"
+            - name: MODEL_ARMOR_ENABLED
+              value: "true"
+            - name: MODEL_ARMOR_TEMPLATE_ID
+              value: orchestrator-armor-v1
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: orchestrator-jwt-secret
+                  key: latest
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 4000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+  traffic:
+    - percent: 100
+      latestRevision: true

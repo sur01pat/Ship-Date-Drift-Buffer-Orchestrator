@@ -1,0 +1,45 @@
+# ── Node.js ───────────────────────────────────────────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+.npm
+
+# ── Python ────────────────────────────────────────────────────────────────────
+app/adk/.venv/
+app/adk/.venv311/
+app/adk/__pycache__/
+**/__pycache__/
+**/*.pyc
+**/*.pyo
+app/adk/*.egg-info/
+app/adk/ship_date_drift_adk.egg-info/
+app/adk/build/
+app/adk/dist/
+app/adk/.pytest_cache/
+
+# ── Secrets / Environment ──────────────────────────────────────────────────────
+.env
+.env.local
+.env.production
+*.pem
+*.key
+
+# ── SQLite databases ──────────────────────────────────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+app/adk/.adk/
+
+# ── Logs ──────────────────────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── Build artefacts ───────────────────────────────────────────────────────────
+app/frontend/build/
+.DS_Store
+
+# ── Bob IDE ───────────────────────────────────────────────────────────────────
+.bob/tmp/
+*.db-shm
+*.db-wal
+app/backend/data/

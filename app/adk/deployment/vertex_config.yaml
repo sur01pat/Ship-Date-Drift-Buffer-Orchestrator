@@ -1,0 +1,54 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# Vertex AI Agent Engine Configuration
+# Supplementary configuration used by deploy_agent_engine.py
+# ─────────────────────────────────────────────────────────────────────────────
+
+agentEngine:
+  displayName: "Ship-Date Drift & Inventory Buffer Orchestrator"
+  description: >
+    Autonomous event-driven supply-chain coordinator. Monitors supplier
+    communications, identifies shipment delays, analyses ERP BOM/SO impacts,
+    and executes multi-system remediation workflows with human-in-the-loop
+    approval. Built with Google Agent Development Kit (ADK) on the Gemini
+    Enterprise Agent Platform.
+
+  # ADK root agent entrypoint
+  adkEntrypoint: "agent:root_agent"
+
+  # Python dependencies bundled into the Agent Engine deployment
+  requirements:
+    - "google-adk>=1.0.0"
+    - "google-cloud-aiplatform>=1.60.0"
+    - "requests>=2.32.0"
+    - "python-dotenv>=1.0.0"
+    - "pydantic>=2.7.0"
+
+  # Tracing & observability
+  enableTracing: true
+  cloudTraceProjectId: "${GOOGLE_CLOUD_PROJECT}"
+
+  # Environment variables injected at runtime
+  envVars:
+    GEMINI_MODEL:           "gemini-2.5-pro"
+    # Set GEMINI_BACKEND to select the API surface:
+    #   "gemini_api"  → requires GOOGLE_API_KEY secret (AI Studio)
+    #   "vertex_ai"   → uses Workload Identity + GOOGLE_GENAI_USE_VERTEXAI=1
+    GEMINI_BACKEND:         "vertex_ai"          # production default
+    GOOGLE_GENAI_USE_VERTEXAI: "1"
+    GOOGLE_CLOUD_LOCATION:  "us-central1"
+    MAX_AUTO_FREIGHT_COST:  "50000"
+    MAX_AUTO_APPROVE_DELAY_DAYS: "10"
+    MAX_AUTO_WTO_QUANTITY:  "10000"
+
+  # Secret Manager references (values injected at deploy time)
+  secrets:
+    - name: TOOL_SERVER_TOKEN
+      secretRef: "orchestrator-tool-server-token"
+    - name: SLACK_APPROVAL_WEBHOOK
+      secretRef: "orchestrator-slack-webhook"
+    - name: TEAMS_APPROVAL_WEBHOOK
+      secretRef: "orchestrator-teams-webhook"
+    # Only needed when GEMINI_BACKEND=gemini_api
+    - name: GOOGLE_API_KEY
+      secretRef: "orchestrator-gemini-api-key"
+      optional: true

@@ -1,0 +1,283 @@
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>UI Test Guide — Ship-Date Drift Orchestrator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,"Segoe UI",system-ui,sans-serif;font-size:14px;line-height:1.6;background:#fff;color:#1f2328}
+.page{max-width:760px;margin:0 auto;padding:40px 24px 60px}
+h1{font-size:21px;font-weight:700;margin-bottom:4px}
+.subtitle{color:#57606a;font-size:13px;margin-bottom:32px}
+h2{font-size:15px;font-weight:700;margin:36px 0 14px;padding-bottom:6px;border-bottom:1px solid #e5e7eb;display:flex;align-items:center;gap:8px}
+h3{font-size:13px;font-weight:600;color:#57606a;text-transform:uppercase;letter-spacing:.05em;margin:20px 0 8px}
+.step{background:#f7f8fa;border:1px solid #e5e7eb;border-radius:6px;padding:14px 16px;margin-bottom:10px;display:grid;grid-template-columns:28px 1fr;gap:12px;align-items:start}
+.step-num{width:24px;height:24px;background:#3b82d4;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;margin-top:1px}
+.step-body{}
+.step-title{font-weight:600;font-size:13px;margin-bottom:3px}
+.step-desc{font-size:13px;color:#374151}
+.expect{display:inline-block;background:#dafbe1;color:#1a7f37;border-radius:4px;font-size:11px;font-weight:600;padding:2px 7px;margin-top:6px}
+.warn{display:inline-block;background:#fff8c5;color:#9a6700;border-radius:4px;font-size:11px;font-weight:600;padding:2px 7px;margin-top:6px}
+.url-box{background:#1f2328;color:#c9d1d9;font-family:"SFMono-Regular",Consolas,monospace;font-size:12px;padding:10px 14px;border-radius:5px;margin:10px 0;word-break:break-all}
+.pill{display:inline-block;padding:1px 7px;border-radius:10px;font-size:11px;font-weight:600}
+.pill-blue{background:#ddf4ff;color:#0969da}
+.pill-green{background:#dafbe1;color:#1a7f37}
+.pill-red{background:#fee2e2;color:#991b1b}
+.pill-yellow{background:#fff8c5;color:#9a6700}
+.check-row{display:flex;align-items:flex-start;gap:8px;padding:5px 0;border-bottom:1px solid #f3f4f6;font-size:13px}
+.check-row:last-child{border:none}
+.check-box{width:16px;height:16px;border:2px solid #d1d5db;border-radius:3px;flex-shrink:0;margin-top:2px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:8px 0}
+th{background:#f7f8fa;padding:7px 10px;text-align:left;border:1px solid #e5e7eb;font-weight:600;font-size:12px;color:#57606a;text-transform:uppercase;letter-spacing:.04em}
+td{padding:7px 10px;border:1px solid #e5e7eb}
+.section-num{background:#3b82d4;color:#fff;border-radius:50%;width:22px;height:22px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+footer{margin-top:48px;padding-top:16px;border-top:1px solid #e5e7eb;text-align:center;font-size:12px;color:#57606a}
+</style>
+</head>
+<body>
+<div class="page">
+
+<h1>🚢 Ship-Date Drift Orchestrator — UI Test Guide</h1>
+<div class="subtitle">Step-by-step walkthrough · v1.0.0-FINAL · Live on Cloud Run</div>
+
+<div class="url-box">🌐 https://orchestrator-frontend-619200633547.us-central1.run.app</div>
+
+
+<h2><span class="section-num">0</span> Before You Start</h2>
+<div class="step">
+  <div class="step-num">→</div>
+  <div class="step-body">
+    <div class="step-title">Open the app in Chrome</div>
+    <div class="step-desc">Navigate to the URL above. Open <strong>DevTools → Console</strong> (Cmd+Option+J) in a second window so you can see any errors as you go.</div>
+    <span class="expect">✓ EXPECT: Green dot "Live" in top-right header</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">→</div>
+  <div class="step-body">
+    <div class="step-title">Confirm no console errors on load</div>
+    <div class="step-desc">The console should be clean. A WebSocket connection to <code>wss://orchestrator-backend-mdyqup7kmq-uc.a.run.app/ws</code> should succeed.</div>
+    <span class="expect">✓ EXPECT: No red errors in console</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">1</span> Dashboard Page</h2>
+<div class="step">
+  <div class="step-num">1</div>
+  <div class="step-body">
+    <div class="step-title">Click "🏠 Dashboard" in sidebar</div>
+    <div class="step-desc">The dashboard should load immediately showing 6 metric cards.</div>
+    <span class="expect">✓ EXPECT: Delayed POs = 2  |  System Status = ✅ Live</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">2</div>
+  <div class="step-body">
+    <div class="step-title">Click "⚡ Simulate Inbound Event" button</div>
+    <div class="step-desc">This fires a POST to <code>/api/demo/simulate</code> and injects a supplier delay event into the orchestrator pipeline.</div>
+    <span class="expect">✓ EXPECT: Button shows "⚙️ Processing…" briefly, then Pending Approvals counter increments to 1</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">3</div>
+  <div class="step-body">
+    <div class="step-title">Check Live Feed panel (bottom of sidebar)</div>
+    <div class="step-desc">After simulate, the Live Feed should show a new real-time WebSocket event pushed from the backend.</div>
+    <span class="expect">✓ EXPECT: New entry appears in Live Feed within 2 seconds</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">4</div>
+  <div class="step-body">
+    <div class="step-title">Check Event Status Breakdown card</div>
+    <div class="step-desc">Should now show <span class="pill pill-yellow">awaiting approval</span> with count 1.</div>
+    <span class="expect">✓ EXPECT: "awaiting approval 1" in event breakdown</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">2</span> Events Page</h2>
+<div class="step">
+  <div class="step-num">5</div>
+  <div class="step-body">
+    <div class="step-title">Click "⚡ Events" in sidebar</div>
+    <div class="step-desc">Should show a table of all orchestration events. After the simulation you'll see at least 1 event.</div>
+    <span class="expect">✓ EXPECT: Table with 1+ rows, status badge <span class="pill pill-yellow">awaiting approval</span></span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">6</div>
+  <div class="step-body">
+    <div class="step-title">Click the ✅ Approve button on the event</div>
+    <div class="step-desc">This fires <code>POST /api/orchestrator/events/:id/approve</code> and moves the event to <span class="pill pill-green">approved</span> status.</div>
+    <span class="expect">✓ EXPECT: Row status changes to <span class="pill pill-green">approved</span> immediately</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">7</div>
+  <div class="step-body">
+    <div class="step-title">Simulate a second event, then Reject it</div>
+    <div class="step-desc">Go back to Dashboard → click Simulate again → go to Events → click ❌ Reject on the new event. Enter a rejection reason when prompted.</div>
+    <span class="expect">✓ EXPECT: Row status changes to <span class="pill pill-red">rejected</span></span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">8</div>
+  <div class="step-body">
+    <div class="step-title">Filter events by status</div>
+    <div class="step-desc">Use the status filter dropdown (if shown) or check that all events are listed with correct status badges.</div>
+    <span class="expect">✓ EXPECT: Filter works, showing only events of selected status</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">3</span> ERP / SAP Page</h2>
+<div class="step">
+  <div class="step-num">9</div>
+  <div class="step-body">
+    <div class="step-title">Click "🏭 ERP/SAP" in sidebar</div>
+    <div class="step-desc">Should show Purchase Orders, Sales Orders, and Inventory tabs with seeded data.</div>
+    <span class="expect">✓ EXPECT: 5 Purchase Orders listed (PO-2025-001 through PO-2025-005)</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">10</div>
+  <div class="step-body">
+    <div class="step-title">Check PO status badges</div>
+    <div class="step-desc">Look for <span class="pill pill-red">delayed</span> POs — there should be 2. These are the ones that trigger drift events.</div>
+    <span class="expect">✓ EXPECT: PO-2025-001 and PO-2025-002 show <span class="pill pill-red">delayed</span></span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">11</div>
+  <div class="step-body">
+    <div class="step-title">Check Sales Orders tab</div>
+    <div class="step-desc">Should list 5 Sales Orders. Some may show <span class="pill pill-yellow">at risk</span> status when impacted by a delayed PO.</div>
+    <span class="expect">✓ EXPECT: 5 SOs with SO-2025-001 through SO-2025-005</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">12</div>
+  <div class="step-body">
+    <div class="step-title">Check Inventory tab</div>
+    <div class="step-desc">Should list all inventory items with on-hand quantities, safety stock levels, and reorder points.</div>
+    <span class="expect">✓ EXPECT: Multiple items with buffer status shown</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">4</span> Vendors Page</h2>
+<div class="step">
+  <div class="step-num">13</div>
+  <div class="step-body">
+    <div class="step-title">Click "🏢 Vendors" in sidebar</div>
+    <div class="step-desc">Shows the Memory Bank vendor profiles — SLA terms, reliability scores, penalty clauses.</div>
+    <span class="expect">✓ EXPECT: 4 vendors listed:<br />Apex Components Ltd. · NovaTech Supplies · Pacific Rim Fabricators · Sterling Industrial</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">14</div>
+  <div class="step-body">
+    <div class="step-title">Click on a vendor to expand delivery history</div>
+    <div class="step-desc">Each vendor row should expand (or link to) their delivery history showing on-time vs late shipment counts.</div>
+    <span class="expect">✓ EXPECT: Delivery history with dates, delays and on-time flag per shipment</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">5</span> Warehouse &amp; Freight Page</h2>
+<div class="step">
+  <div class="step-num">15</div>
+  <div class="step-body">
+    <div class="step-title">Click "📦 Warehouse &amp; Freight" in sidebar</div>
+    <div class="step-desc">Shows Warehouse Transfer Orders (WTOs) and Freight Requests created by the sub-agents. Initially empty until a simulation runs.</div>
+    <span class="expect">✓ EXPECT: Page loads (may show empty tables before simulation)</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">16</div>
+  <div class="step-body">
+    <div class="step-title">Simulate an event from Dashboard, then return here</div>
+    <div class="step-desc">After simulation the orchestrator's Freight Sub-Agent creates a freight request. Return to this page to see it.</div>
+    <span class="expect">✓ EXPECT: At least 1 Freight Request row with mode (air/ocean/ground), cost, and status</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">6</span> Audit Ledger Page</h2>
+<div class="step">
+  <div class="step-num">17</div>
+  <div class="step-body">
+    <div class="step-title">Click "📋 Audit Ledger" in sidebar</div>
+    <div class="step-desc">Shows the append-only audit trail of every agent action. After a simulation there should be 5–8 audit entries per event.</div>
+    <span class="expect">✓ EXPECT: Table with EVENT_INGESTED, ERP_IMPACT_ANALYSIS, GATEWAY_DISPATCH, FREIGHT_REQUEST_CREATED, REMEDIATION_STAGED rows</span>
+  </div>
+</div>
+<div class="step">
+  <div class="step-num">18</div>
+  <div class="step-body">
+    <div class="step-title">Check audit stats at the top</div>
+    <div class="step-desc">Total audit events counter should match the number of simulations × ~5 steps each.</div>
+    <span class="expect">✓ EXPECT: Total &gt; 0 after at least one simulation</span>
+  </div>
+</div>
+
+
+<h2><span class="section-num">7</span> Agent Registry Page</h2>
+<div class="step">
+  <div class="step-num">19</div>
+  <div class="step-body">
+    <div class="step-title">Click "🗂️ Agent Registry" in sidebar</div>
+    <div class="step-desc">Shows all 4 registered ADK agents with their capabilities, tools, and status.</div>
+    <span class="expect">✓ EXPECT: 4 agents listed</span>
+  </div>
+</div>
+
+<table>
+  <thead><tr><th>Agent</th><th>Role</th><th>Expected Status</th></tr></thead>
+  <tbody>
+    <tr><td>InboundShipDateDriftOrchestrator</td><td>Root SequentialAgent — coordinates all steps</td><td><span class="pill pill-green">active</span></td></tr>
+    <tr><td>MemoryBankAgent</td><td>Retrieves vendor SLA &amp; delivery history</td><td><span class="pill pill-green">active</span></td></tr>
+    <tr><td>WarehouseSubAgent</td><td>Creates Warehouse Transfer Orders</td><td><span class="pill pill-green">active</span></td></tr>
+    <tr><td>FreightSubAgent</td><td>Selects freight mode &amp; books requests</td><td><span class="pill pill-green">active</span></td></tr>
+  </tbody>
+</table>
+
+
+<h2><span class="section-num">8</span> Full End-to-End Flow Test</h2>
+<p style="font-size:13px;color:#57606a;margin-bottom:14px">Run this sequence to exercise every layer of the system in one go:</p>
+
+<table>
+  <thead><tr><th>#</th><th>Step</th><th>Where</th><th>What to verify</th></tr></thead>
+  <tbody>
+    <tr><td>1</td><td>Open Dashboard</td><td>Dashboard page</td><td>Delayed POs = 2, Status = operational</td></tr>
+    <tr><td>2</td><td>Click "⚡ Simulate Inbound Event"</td><td>Dashboard</td><td>Button spins → counter updates</td></tr>
+    <tr><td>3</td><td>Watch Live Feed</td><td>Sidebar</td><td>New event appears within 2s</td></tr>
+    <tr><td>4</td><td>Go to Events page</td><td>Events</td><td>New row: status = awaiting approval</td></tr>
+    <tr><td>5</td><td>Click ✅ Approve</td><td>Events</td><td>Status flips to approved</td></tr>
+    <tr><td>6</td><td>Go to Warehouse &amp; Freight</td><td>Warehouse</td><td>Freight request visible with mode + cost</td></tr>
+    <tr><td>7</td><td>Go to Audit Ledger</td><td>Audit</td><td>5+ new audit entries for the session</td></tr>
+    <tr><td>8</td><td>Go back to Dashboard</td><td>Dashboard</td><td>Pending Approvals back to 0</td></tr>
+  </tbody>
+</table>
+
+
+<h2><span class="section-num">9</span> Quick Sanity Checklist</h2>
+<div class="check-row"><div class="check-box"></div><span>Green "Live" dot in header (WebSocket connected)</span></div>
+<div class="check-row"><div class="check-box"></div><span>Dashboard shows metric cards with real numbers (not all zeros)</span></div>
+<div class="check-row"><div class="check-box"></div><span>Simulate button works and dashboard updates automatically</span></div>
+<div class="check-row"><div class="check-box"></div><span>Events page: Approve button changes status to <span class="pill pill-green">approved</span></span></div>
+<div class="check-row"><div class="check-box"></div><span>Events page: Reject button changes status to <span class="pill pill-red">rejected</span></span></div>
+<div class="check-row"><div class="check-box"></div><span>ERP page: 5 POs, 2 shown as <span class="pill pill-red">delayed</span></span></div>
+<div class="check-row"><div class="check-box"></div><span>Vendors page: 4 vendors with SLA details</span></div>
+<div class="check-row"><div class="check-box"></div><span>Warehouse page: Freight requests appear after simulation</span></div>
+<div class="check-row"><div class="check-box"></div><span>Audit page: Entries appear after simulation (EVENT_INGESTED, FREIGHT_REQUEST_CREATED, etc.)</span></div>
+<div class="check-row"><div class="check-box"></div><span>Agent Registry: 4 agents with active status</span></div>
+<div class="check-row"><div class="check-box"></div><span>No red errors in Chrome DevTools Console</span></div>
+
+</div>
+<footer>Made with IBM Bob</footer>
+</body>
+</html>
