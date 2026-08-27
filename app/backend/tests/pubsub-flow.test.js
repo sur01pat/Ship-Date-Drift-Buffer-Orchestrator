@@ -21,6 +21,8 @@
 
 // Prevent port collision with other test files
 process.env.PORT = '0';
+// Ensure Pub/Sub publishing is active regardless of CI env-var overrides
+process.env.PUBSUB_EVENTS_ENABLED = 'true';
 
 // ── 1. Mock @google-cloud/pubsub BEFORE any require of orchestrator ───────────
 
