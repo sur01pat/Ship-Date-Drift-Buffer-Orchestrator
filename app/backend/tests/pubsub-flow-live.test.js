@@ -22,6 +22,14 @@
 
 'use strict';
 
+// Skip automatically in CI environments (Cloud Build, GitHub Actions, etc.)
+// where live GCP credentials / subscriptions are not available.
+if (process.env.CI) {
+  describe.skip('pubsub-flow-live (skipped in CI)', () => {
+    test('placeholder', () => {});
+  });
+} else {
+
 process.env.GOOGLE_CLOUD_PROJECT = 'ship-date-drift';
 process.env.PUBSUB_EVENTS_ENABLED = 'true';
 process.env.PUBSUB_TOPIC_ID = 'orchestrator-events';
@@ -398,3 +406,5 @@ test('LIVE GCP: full topology — producer/consumer summary with real message ID
   console.log(`    EVENT_BLOCKED      : ${blocked.length} message(s)`);
   console.log(`    EVENT_APPROVED     : ${approved.length} message(s)`);
 }, 40000);
+
+} // end: else (not CI)

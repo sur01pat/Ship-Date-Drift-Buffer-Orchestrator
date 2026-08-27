@@ -21,6 +21,7 @@ steps:
       - -c
       - |
         npm ci
+        CI=true \
         NODE_ENV=test \
         GCP_IDENTITY_ENABLED=false \
         GCP_REGISTRY_ENABLED=false \
