@@ -1,6 +1,7 @@
 /**
  * Tests: REST API Integration
  */
+process.env.PORT = '0'; // avoid port 4000 collision when run alongside other test files
 
 const request = require('supertest');
 const { app, server, db } = require('../src/index');

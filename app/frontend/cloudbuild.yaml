@@ -3,9 +3,9 @@ steps:
     args:
       - 'build'
       - '--build-arg'
-      - 'REACT_APP_API_URL=https://orchestrator-backend-628095447119.us-central1.run.app/api'
+      - 'REACT_APP_API_URL=https://orchestrator-backend-icnkyenovq-uc.a.run.app/api'
       - '--build-arg'
-      - 'REACT_APP_WS_URL=wss://orchestrator-backend-628095447119.us-central1.run.app/ws'
+      - 'REACT_APP_WS_URL=wss://orchestrator-backend-icnkyenovq-uc.a.run.app/ws'
       - '-t'
       - 'gcr.io/ship-date-drift/orchestrator-frontend:v1'
       - '.'

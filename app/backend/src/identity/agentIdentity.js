@@ -42,7 +42,7 @@ const GCP_IDENTITY_ENABLED = process.env.GCP_IDENTITY_ENABLED !== 'false';
 
 // Audience for OIDC tokens: matches the Cloud Run backend URL
 const OIDC_AUDIENCE  = process.env.OIDC_AUDIENCE ||
-                       'https://orchestrator-backend-628095447119.us-central1.run.app';
+                       'https://orchestrator-backend-icnkyenovq-uc.a.run.app';
 
 // Secret Manager: JWT_SECRET for local mode can be fetched from Secret Manager
 // instead of env var when running in production Cloud Run.

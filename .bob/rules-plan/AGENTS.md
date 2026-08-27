@@ -48,8 +48,13 @@ PENDING → RUNNING → AWAITING_APPROVAL → COMPLETED
 - Removing type hints or making docstrings vague reduces tool-use quality without any error at startup.
 - Optional parameters must have a default value AND be typed as `str` (not `Optional[str]`) because ADK parses them as required if no default is visible.
 
+## Model Factory — Architectural Detail
+
+- **`make_model()` returns a `_RoutedGemini` inner class** (defined inside `make_model()`) that overrides `api_client` as a property returning the pre-built `google.genai.Client`. This is the mechanism that keeps one authenticated client per process and prevents ADK from building its own.
+- **`config.py` auto-detects the backend**: if `GOOGLE_API_KEY` or `GEMINI_API_KEY` is set → `gemini_api`; else → `vertex_ai`. `GEMINI_BACKEND` env var overrides auto-detection.
+- **`tool_server_client.py` auto-bootstraps its JWT** — on first tool call it calls `GET /api/auth/bootstrap` and caches the `user-admin` token. This is a dev convenience; production should set `TOOL_SERVER_TOKEN` explicitly.
+
 ## Docker vs Local Python Versions
 
 - **Docker ADK service** uses `python:3.11-slim` (as specified in `docker-compose.yml`).
-- **Local `.venv`** at `app/adk/.venv` uses Python 3.14 (the binary at `.venv/bin/python3.14`).
-- Dependencies must be compatible with 3.11 (Docker) even if local development uses 3.14.
+- **Two `.venv`s** at `app/adk/`: `.venv` (Python 3.14, used by `start-dev.sh`) and `.venv311` (Python 3.11). All packages must be 3.11-compatible; test with `.venv311` before adding a new dependency.

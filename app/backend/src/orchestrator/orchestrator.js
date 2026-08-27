@@ -96,7 +96,7 @@ async function _scheduleApprovalReminder(eventId, sessionId) {
     const client = new CloudTasksClient();
     const parent = client.queuePath(GCP_PROJECT, GCP_LOCATION, CLOUD_TASKS_QUEUE);
     const backendUrl = process.env.BACKEND_URL ||
-      'https://orchestrator-backend-628095447119.us-central1.run.app';
+      'https://orchestrator-backend-icnkyenovq-uc.a.run.app';
 
     const task = {
       httpRequest: {

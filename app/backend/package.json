@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest --runInBand --forceExit"
+    "test": "jest --runInBand --forceExit",
+    "test:coverage": "jest --runInBand --forceExit --coverage --coverageDirectory=coverage --collectCoverageFrom='src/**/*.js' --coveragePathIgnorePatterns='src/observability/tracing.js'"
   },
   "dependencies": {
     "@google-cloud/dlp": "^4.4.0",
@@ -47,6 +48,11 @@
     "testEnvironment": "node",
     "testMatch": [
       "**/tests/**/*.test.js"
+    ],
+    "coverageReporters": ["text", "text-summary", "lcov"],
+    "collectCoverageFrom": [
+      "src/**/*.js",
+      "!src/observability/tracing.js"
     ]
   }
 }

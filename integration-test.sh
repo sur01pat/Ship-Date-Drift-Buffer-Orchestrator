@@ -6,8 +6,8 @@
 
 set -euo pipefail
 
-BASE="https://orchestrator-backend-628095447119.us-central1.run.app"
-FE="https://orchestrator-frontend-628095447119.us-central1.run.app"
+BASE="https://orchestrator-backend-icnkyenovq-uc.a.run.app"
+FE="https://orchestrator-frontend-icnkyenovq-uc.a.run.app"
 PASS=0; FAIL=0; SKIP=0
 CREATED_MEMORY_ID=""
 
@@ -232,8 +232,8 @@ echo "════════════════════════�
 echo ""
 echo "  Backend:  ${BASE}"
 echo "  Frontend: ${FE}"
-echo "  Backend revision: orchestrator-backend-00006-55h"
-echo "  Frontend revision: orchestrator-frontend-00005-jwc"
+echo "  Backend revision: $(gcloud run revisions list --service=orchestrator-backend --region=us-central1 --format='value(metadata.name)' --limit=1 2>/dev/null || echo unknown)"
+echo "  Frontend revision: $(gcloud run revisions list --service=orchestrator-frontend --region=us-central1 --format='value(metadata.name)' --limit=1 2>/dev/null || echo unknown)"
 echo ""
 
 [ "$FAIL" -eq 0 ]

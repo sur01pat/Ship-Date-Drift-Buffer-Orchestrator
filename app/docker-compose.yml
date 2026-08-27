@@ -37,7 +37,7 @@ services:
       - TOOL_SERVER_URL=http://backend:4000
       - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT:-your-gcp-project-id}
       - GOOGLE_CLOUD_LOCATION=${GOOGLE_CLOUD_LOCATION:-us-central1}
-      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-2.5-pro}
+      - GEMINI_MODEL=${GEMINI_MODEL:-gemini-3.7-flash}
       - GOOGLE_APPLICATION_CREDENTIALS=/app/service_account.json
     depends_on:
       backend:

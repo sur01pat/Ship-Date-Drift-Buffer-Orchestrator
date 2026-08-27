@@ -28,7 +28,7 @@ const logger = require('../logger');
 const GCP_PROJECT  = process.env.GOOGLE_CLOUD_PROJECT  || 'ship-date-drift';
 const GCP_LOCATION = process.env.GOOGLE_CLOUD_LOCATION || 'us-central1';
 const BACKEND_URL  = process.env.BACKEND_URL ||
-                     'https://orchestrator-backend-628095447119.us-central1.run.app';
+                     'https://orchestrator-backend-icnkyenovq-uc.a.run.app';
 const GCP_REGISTRY_ENABLED  = process.env.GCP_REGISTRY_ENABLED  !== 'false';
 const FIRESTORE_REGISTRY_ENABLED = process.env.FIRESTORE_REGISTRY_ENABLED !== 'false';
 

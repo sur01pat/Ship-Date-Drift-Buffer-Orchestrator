@@ -18,8 +18,10 @@ This file provides guidance to agents when working with code in this repository.
 ### Backend
 ```bash
 cd app/backend
-npm test                         # all tests (Jest, --runInBand --forceExit)
-npx jest tests/armor.test.js    # single test file
+npm test                              # all tests (Jest, --runInBand --forceExit)
+npm run test:coverage                 # all tests + Istanbul coverage report
+npx jest tests/armor.test.js         # single test file
+npx jest tests/e2e.test.js --runInBand --forceExit  # full e2e suite
 ```
 
 ### ADK Python
@@ -105,3 +107,26 @@ cd app && docker compose up --build
 - Model via `get_model_string()` from `model_factory` — never hardcoded
 - Every `LlmAgent` attaches both `before_model_callback` and `after_model_callback` from `callbacks/model_armor_callbacks.py`
 - `output_key` on `LlmAgent` stores result in session state for downstream agents
+
+## Non-obvious Model Factory Details
+
+- **`make_model()` returns a `_RoutedGemini` inner class** (not plain `Gemini`) — it subclasses `Gemini` to inject the pre-built `google.genai.Client` via an `api_client` property override. This prevents ADK from constructing its own client (which would lose the `api_key` / `vertexai=True`).
+- **`GEMINI_API_KEY` is a recognised alias** for `GOOGLE_API_KEY` in both `config.py` and `_detect_backend()`. Either env var activates Gemini API mode.
+- **Default model is `gemini-3.7-flash`** (hardcoded in `config.py`). Override via `GEMINI_MODEL` env var.
+- **`_build_gemini_api_client()` raises `EnvironmentError`** (not `ValueError`) when no API key is set — test assertions must match `EnvironmentError`.
+- **Two `.venv`s exist** in `app/adk/`: `.venv` (Python 3.14, used by `start-dev.sh` and pytest) and `.venv311` (Python 3.11, matches Docker). Dependencies must stay compatible with 3.11.
+
+## Non-obvious ADK Test Patterns
+
+- **`tool_server_client.py` lazily bootstraps its JWT** via `GET /api/auth/bootstrap` on first use. Any test that imports a tool without the `mock_tool_server` fixture will attempt a live HTTP call and fail silently (returns empty token), causing downstream auth failures.
+- **`make_model.cache_clear()`** must be called before and after any test that reloads `model_factory` or `config` — the `@lru_cache` persists across test modules unless explicitly cleared.
+- **`callbacks/observability_callbacks.py`** exists alongside `model_armor_callbacks.py` — agents needing audit trail callbacks should attach from there (not documented in agent files yet).
+
+## Non-obvious Backend Test Gotchas
+
+- **`process.env.PORT = '0'` must be set before `require('../src/index')`** in every test file that loads the server. Without it, the server binds to port 4000 and collides when multiple test files run together. All test files must have this line first.
+- **`generateWTONumber()` and `generateFRNumber()` use `Date.now().slice(-6)`** — two calls within the same millisecond produce a `UNIQUE constraint failed` on the `wto_number` / `fr_number` column. Insert `await new Promise(r => setTimeout(r, 2))` between back-to-back create calls in tests.
+- **`agentRegistry.register()` uses `INSERT`, not upsert** — calling it twice with the same `id` throws `UNIQUE constraint failed`. Test IDs must be unique per run (e.g. append `Date.now()`).
+- **`SESSION_TIMEOUT_MS` is read at module load time** in `agentRuntime.js` as a `const`. To test heartbeat timeout, you must `jest.resetModules()`, set `process.env.SESSION_TIMEOUT_MS = '1'`, then re-`require` the module.
+- **`EVENT_BLOCKED` Pub/Sub is never published by the `/api/orchestrator/ingest` route** — `armorMiddleware` returns HTTP 400 before `processEvent()` runs. `EVENT_BLOCKED` only fires when `processEvent()` is called directly.
+- **Pub/Sub is fire-and-forget (`.catch(() => {})`)** — after triggering an action that publishes, `await new Promise(r => setTimeout(r, 100))` is needed before asserting captured pub/sub messages in tests.

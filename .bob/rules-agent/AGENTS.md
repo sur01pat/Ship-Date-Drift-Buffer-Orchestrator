@@ -20,9 +20,13 @@
 - **Type hints are required on tool parameters** — ADK generates JSON Schema from them. Missing types fail at agent instantiation.
 - **Every `LlmAgent` must attach both callbacks**: `before_model_callback=model_armor_before_model_callback` and `after_model_callback=model_armor_after_model_callback`.
 - **`output_key` on `LlmAgent`** stores the final text response into session state for downstream agents.
-- **`make_model()` is `@lru_cache(maxsize=1)`** — one `Gemini` instance per process.
-- **ADK tests run fully offline** — `conftest.py` `mock_tool_server` fixture patches all `tool_server_client` functions.
+- **`make_model()` is `@lru_cache(maxsize=1)` returning a `_RoutedGemini` subclass** — it injects the pre-built `google.genai.Client` via an `api_client` property override so ADK never re-authenticates. Always call `make_model.cache_clear()` in tests that reload `config` or `model_factory`.
+- **ADK tests run fully offline** — `conftest.py` `mock_tool_server` fixture patches all `tool_server_client` functions. Any test importing tools *without* this fixture triggers a live `GET /api/auth/bootstrap` call.
 - **`asyncio_mode = "auto"`** in `pyproject.toml` — all async test functions auto-run without `@pytest.mark.asyncio`.
+- **`GEMINI_API_KEY` is an accepted alias** for `GOOGLE_API_KEY` in both `config.py` and auto-detection logic.
+- **`_build_gemini_api_client()` raises `EnvironmentError`** (not `ValueError`) — match this in `pytest.raises(EnvironmentError, ...)`.
+- **`callbacks/observability_callbacks.py`** exists alongside `model_armor_callbacks.py` — use it for agents needing audit-trail callbacks.
+- **Two `.venv`s** in `app/adk/`: `.venv` (Python 3.14, used by `start-dev.sh`) and `.venv311` (Python 3.11, Docker). All new dependencies must be 3.11-compatible.
 
 ## Adding a New Tool (End-to-End Checklist)
 
@@ -33,6 +37,15 @@
 5. Add tool to the relevant agent's `tools=[...]` list in `app/adk/agents/`
 6. Add mock in `conftest.py` `mock_tool_server` fixture
 7. Add test in `app/adk/tests/test_tools.py`
+
+## Non-obvious Backend Test Gotchas
+
+- **`process.env.PORT = '0'` before `require('../src/index')`** in every test file that loads the server — without it the server binds to 4000 and collides when suites run together (`--runInBand`).
+- **`generateWTONumber()` / `generateFRNumber()` use `Date.now().slice(-6)`** — back-to-back calls within the same millisecond throw `UNIQUE constraint failed`. Fix: `await new Promise(r => setTimeout(r, 2))` between creates.
+- **`agentRegistry.register()` is `INSERT` not upsert** — duplicate `id` throws. Always use a unique ID per test run (e.g. `'agent-' + Date.now()`).
+- **`SESSION_TIMEOUT_MS` is a module-load-time `const`** — to test timeout behaviour, use `jest.resetModules()`, set the env var, then re-`require` the module.
+- **`EVENT_BLOCKED` Pub/Sub never fires from `/api/orchestrator/ingest`** — `armorMiddleware` returns HTTP 400 before `processEvent()` runs. Call `processEvent()` directly to trigger the event.
+- **Pub/Sub assertions need a 100ms yield** — messages are published fire-and-forget; `await new Promise(r => setTimeout(r, 100))` is needed before checking captured messages.
 
 ## GCP Service Integration Pattern
 

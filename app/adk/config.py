@@ -29,10 +29,10 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # ── Gemini model ──────────────────────────────────────────────────────────────
-# Default: gemini-2.5-flash — fully available on both free and paid API tiers.
-# gemini-2.5-pro requires a billing-enabled project; set GEMINI_MODEL=gemini-2.5-pro
-# in your .env to use it once your API key has access.
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+# Default: gemini-3.7-flash — fully available on both free and paid API tiers.
+# gemini-3.7-flash was released August 2026. Override via GEMINI_MODEL env var
+# (e.g. GEMINI_MODEL=gemini-3.7-pro) once your API key has access.
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.7-flash")
 
 # ── Backend selection ─────────────────────────────────────────────────────────
 # "gemini_api"  → google-genai Client uses GOOGLE_API_KEY  (Google AI Studio)
@@ -71,7 +71,7 @@ AGENT_ENGINE_RESOURCE  = os.getenv(
 # for local development (e.g. TOOL_SERVER_URL=http://localhost:4000).
 TOOL_SERVER_URL = os.getenv(
     "TOOL_SERVER_URL",
-    "https://orchestrator-backend-628095447119.us-central1.run.app",
+    "https://orchestrator-backend-icnkyenovq-uc.a.run.app",
 )
 TOOL_SERVER_TOKEN = os.getenv("TOOL_SERVER_TOKEN", "")   # admin JWT; bootstrapped at startup
 

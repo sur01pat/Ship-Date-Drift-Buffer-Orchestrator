@@ -44,8 +44,8 @@ app.use(cors({
       config.FRONTEND_URL,
       'http://localhost:3000',
       'http://localhost:3001',
-      // Cloud Run — ship-date-drift project (628095447119)
-      'https://orchestrator-frontend-628095447119.us-central1.run.app',
+      // Cloud Run — ship-date-drift project (icnkyenovq)
+      'https://orchestrator-frontend-icnkyenovq-uc.a.run.app',
       // Cloud Run — previous gen-lang-client project (backward compat)
       'https://orchestrator-frontend-mdyqup7kmq-uc.a.run.app',
       'https://orchestrator-frontend-619200633547.us-central1.run.app',

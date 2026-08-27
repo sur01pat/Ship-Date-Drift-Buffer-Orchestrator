@@ -2,7 +2,7 @@
 ADK Tests – Model Factory
 ==========================
 Verifies that model_factory correctly:
-  - Uses gemini-2.5-pro (or whatever GEMINI_MODEL is set to)
+  - Uses gemini-3.7-flash (or whatever GEMINI_MODEL is set to)
   - Auto-detects the backend from environment variables
   - Routes to Gemini API when GOOGLE_API_KEY is present
   - Routes to Vertex AI when GOOGLE_GENAI_USE_VERTEXAI=1
@@ -89,29 +89,29 @@ def test_config_explicit_backend_vertex_ai():
     importlib.reload(cfg)
 
 
-def test_config_model_default_is_gemini_25_flash():
-    """Default model is gemini-2.5-flash when GEMINI_MODEL env var is unset.
+def test_config_model_default_is_gemini_37_flash():
+    """Default model is gemini-3.7-flash when GEMINI_MODEL env var is unset.
 
-    The hardcoded fallback in config.py is gemini-2.5-flash.  In production
-    the .env file sets GEMINI_MODEL=gemini-2.5-pro.  We patch load_dotenv to
-    be a no-op so the .env file does not interfere with this unit test.
+    The hardcoded fallback in config.py is gemini-3.7-flash.  In production
+    the .env file may override GEMINI_MODEL.  We patch load_dotenv to be a
+    no-op so the .env file does not interfere with this unit test.
     """
     import config as cfg
-    # Patch load_dotenv to prevent .env from injecting GEMINI_MODEL=gemini-2.5-pro
+    # Patch load_dotenv to prevent .env from injecting a different GEMINI_MODEL
     env_without_model = {k: v for k, v in os.environ.items() if k != "GEMINI_MODEL"}
     with patch("dotenv.load_dotenv"), \
          patch.dict(os.environ, env_without_model, clear=True):
         importlib.reload(cfg)
-        assert cfg.GEMINI_MODEL == "gemini-2.5-flash"
+        assert cfg.GEMINI_MODEL == "gemini-3.7-flash"
     importlib.reload(cfg)   # restore production values
 
 
 def test_config_model_env_override():
     """GEMINI_MODEL env var is respected."""
-    with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-2.5-flash"}, clear=False):
+    with patch.dict(os.environ, {"GEMINI_MODEL": "gemini-3.7-flash"}, clear=False):
         import config as cfg
         importlib.reload(cfg)
-        assert cfg.GEMINI_MODEL == "gemini-2.5-flash"
+        assert cfg.GEMINI_MODEL == "gemini-3.7-flash"
     importlib.reload(cfg)
 
 

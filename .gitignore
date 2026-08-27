@@ -43,3 +43,4 @@ app/frontend/build/
 *.db-shm
 *.db-wal
 app/backend/data/
+app/backend/coverage/

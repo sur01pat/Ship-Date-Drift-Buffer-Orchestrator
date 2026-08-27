@@ -68,9 +68,9 @@ steps:
       - -t
       - gcr.io/$PROJECT_ID/orchestrator-frontend:latest
       - --build-arg
-      - REACT_APP_API_URL=https://orchestrator-backend-628095447119.us-central1.run.app/api
+      - REACT_APP_API_URL=https://orchestrator-backend-icnkyenovq-uc.a.run.app/api
       - --build-arg
-      - REACT_APP_WS_URL=wss://orchestrator-backend-628095447119.us-central1.run.app/ws
+      - REACT_APP_WS_URL=wss://orchestrator-backend-icnkyenovq-uc.a.run.app/ws
       - app/frontend
     waitFor: [backend-test]
 
@@ -118,7 +118,7 @@ steps:
       - --max-instances=10
       - --execution-environment=gen2
       - --set-env-vars
-      - NODE_ENV=production,LOG_LEVEL=info,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1,OTEL_ENABLED=true,GCP_IDENTITY_ENABLED=true,SECRET_MANAGER_JWT_ENABLED=true,SECRET_MANAGER_SLA_ENABLED=true,GCP_REGISTRY_ENABLED=true,FIRESTORE_REGISTRY_ENABLED=true,FIRESTORE_MEMORY_ENABLED=true,FIRESTORE_SESSIONS_ENABLED=true,PUBSUB_EVENTS_ENABLED=true,PUBSUB_TOPIC_ID=orchestrator-events,CLOUD_TASKS_ENABLED=true,CLOUD_TASKS_QUEUE=orchestrator-approval-reminders,RUNTIME_TASKS_ENABLED=true,LONG_RUNNING_QUEUE=orchestrator-long-running,DLP_ENABLED=false,MODEL_ARMOR_ENABLED=true,MODEL_ARMOR_TEMPLATE_ID=orchestrator-armor-v1,FRONTEND_URL=https://orchestrator-frontend-628095447119.us-central1.run.app
+      - NODE_ENV=production,LOG_LEVEL=info,GOOGLE_CLOUD_PROJECT=$PROJECT_ID,GOOGLE_CLOUD_LOCATION=us-central1,OTEL_ENABLED=true,GCP_IDENTITY_ENABLED=true,SECRET_MANAGER_JWT_ENABLED=true,SECRET_MANAGER_SLA_ENABLED=true,GCP_REGISTRY_ENABLED=true,FIRESTORE_REGISTRY_ENABLED=true,FIRESTORE_MEMORY_ENABLED=true,FIRESTORE_SESSIONS_ENABLED=true,PUBSUB_EVENTS_ENABLED=true,PUBSUB_TOPIC_ID=orchestrator-events,CLOUD_TASKS_ENABLED=true,CLOUD_TASKS_QUEUE=orchestrator-approval-reminders,RUNTIME_TASKS_ENABLED=true,LONG_RUNNING_QUEUE=orchestrator-long-running,DLP_ENABLED=false,MODEL_ARMOR_ENABLED=true,MODEL_ARMOR_TEMPLATE_ID=orchestrator-armor-v1,FRONTEND_URL=https://orchestrator-frontend-icnkyenovq-uc.a.run.app
     waitFor: [push-backend]
 
   # ── Step 6: Deploy Frontend to Cloud Run ──────────────────────────────────

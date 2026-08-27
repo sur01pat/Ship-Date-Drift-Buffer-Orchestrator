@@ -33,6 +33,9 @@ Vertex AI Agent Engine: root_agent (ADK SequentialAgent)
 - `scanAsync()` pipeline: Layer 1 (local regex) → Layer 2 (GCP Model Armor REP endpoint) → Layer 3 (Cloud DLP, opt-in).
 - Model Armor uses **regional endpoint** (`.rep.`) — global endpoint returns 403.
 - Model Armor callbacks in ADK (`callbacks/model_armor_callbacks.py`) call the **Node backend** `/api/armor/scan` route, not GCP directly.
+- **`before_model_callback` hard-blocks** on `PROMPT_INJECTION` and `JAILBREAK_ATTEMPT` threat types by returning a synthetic `LlmResponse` that short-circuits the Gemini call entirely.
+- **`after_model_callback`** scans model *output* for PII and replaces affected parts — it never blocks, only sanitises.
+- **`callbacks/observability_callbacks.py`** exists alongside the armor callbacks but is not yet wired to any agent.
 
 ## Agent Runtime
 
